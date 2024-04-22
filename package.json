@@ -38,7 +38,7 @@
 		"@types/react-dom": "^18.0.11",
 		"concurrently": "^4.1.2",
 		"css-loader": "^3.4.2",
-		"electron": "^6.1.9",
+		"electron": "^22.3.25",
 		"electron-builder": "^21.2.0",
 		"electron-is-dev": "^1.1.0",
 		"eslint": "^6.8.0",
