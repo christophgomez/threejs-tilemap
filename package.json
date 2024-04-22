@@ -10,7 +10,7 @@
 		"build-sandbox": "node ./build.js",
 		"build-react": "react-scripts build",
 		"build": "webpack --mode production",
-		"deploy": "gh-pages -d build",
+		"deploy": "firebase deploy",
 		"electron-dev": "concurrently \"BROWSER=none npm run start-sandbox\" \"wait-on http://localhost:3000 && electron .\""
 	},
 	"repository": {
