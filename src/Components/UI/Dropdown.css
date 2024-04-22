@@ -97,7 +97,7 @@
   border-top: none;
   border-bottom: none;
   transform: scaleY(0);
-  right: -1px;
+  right: -.5px;
   transform-origin: top;
   transition: all 0.2s;
   overflow: hidden;

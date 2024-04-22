@@ -19,11 +19,11 @@ export default ({
     }>;
   }) => {
     useEffect(() => {
-      console.log("mount");
+      // console.log("mount");
     }, []);
   
     useEffect(() => {
-      console.log("on objs");
+      // console.log("on objs");
   
       const scenes: Array<{
         scene: Scene;

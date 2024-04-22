@@ -72,6 +72,9 @@ export const getTrackInfo = async (trackUri, accessToken) => {
   }
 
   const data = await response.json();
+
+  // console.log('got track info', data);
+
   return data;
 };
 
@@ -153,7 +156,12 @@ export const getTrackAudioAnalysis = async (
   trackUri,
   accessToken
 ): Promise<SpotifyAudioAnalysisResponse> => {
-  if (!trackUri || !accessToken) return null;
+  // console.log('getting track analysis')
+  if (!trackUri || !accessToken) {
+    // console.log('no track uri or access token');
+    // console.log(trackUri, accessToken);
+    return null;
+  }
   // Extract the ID from the track URI
   const trackId = trackUri.split(":")[2];
 
@@ -172,7 +180,9 @@ export const getTrackAudioAnalysis = async (
   }
 
   const data = await response.json();
+
   data.track["uri"] = trackUri;
+  // console.log('got track analysis', data);
 
   return data;
 };
@@ -248,6 +258,7 @@ export const getUserLibrary = async (
 
   const data = await res.json();
 
+  // console.log('got library', data);
   return data;
 };
 
@@ -284,6 +295,8 @@ export const getUserPlaylists = async (
   }
 
   const data = await res.json();
+
+  // console.log('got playlists', data);
 
   return data;
 };

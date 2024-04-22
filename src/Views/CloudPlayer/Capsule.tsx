@@ -1,15 +1,15 @@
 import Tools from "../../lib/utils/Tools";
-const NUM_BANDS = 256;
+// const NUM_BANDS = 256;
 const SCALE = {
   MIN: 15.0,
   MAX: 50.0,
 };
 const SPEED = {
   MIN: 0.2,
-  MAX: 1.0,
+  MAX: 0.8,
 };
 const ALPHA = {
-  MIN: 0.7,
+  MIN: 0.5,
   MAX: 0.8,
 };
 const SPIN = {
@@ -31,7 +31,7 @@ export default class Capsule {
   public speed;
   public size;
   public spin;
-  public band: number;
+  // public band: number;
 
   public data: { [key: string]: any } = {};
 
@@ -69,18 +69,34 @@ export default class Capsule {
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  constructor(x1 = 0, y1 = 0) {
+  constructor(x1 = 0, y1 = 0, color = null, label = "") {
     Capsule.num++;
     this._num = Capsule.num;
     this.x = x1;
     this.y = y1;
+
+    if (color) this.color = color;
     // for (var i = 0; i < this.COLORS.length; i++) {
     //   let symb = "#";
     //   let color = `${symb}${this.COLORS[i]}`;
     //   this.COLORS[i] = color;
     // }
+
+    // Initialize the off-screen canvas and context
+    // this.offscreenCanvas = document.createElement("canvas");
+    // this.offscreenCtx = this.offscreenCanvas.getContext("2d");
+
+    // // Set the dimensions of the off-screen canvas
+    // // You may need to adjust these values based on your text size
+    // this.offscreenCanvas.width = 50; // Adjust width as needed
+    // this.offscreenCanvas.height = 50; // Adjust height as needed
+
+    // this.drawText();
+    this.label = label;
     this.reset();
   }
+
+  label: string = "";
 
   resetColor() {
     this.color = Tools.randomElement(Capsule.COLORS);
@@ -94,14 +110,14 @@ export default class Capsule {
   public energy = 0;
 
   reset() {
-    this.level = 1 + Math.floor(Tools.random(1));
+    this.level = 1 + Math.floor(Tools.random(4));
     this.scale = Tools.random(SCALE.MIN, SCALE.MAX);
     this.alpha = Tools.random(ALPHA.MIN, ALPHA.MAX);
     this.speed = Tools.random(SPEED.MIN, SPEED.MAX);
-    this.color = Tools.randomElement(Capsule.COLORS);
+    if (!this.color) this.color = Tools.randomElement(Capsule.COLORS);
     this.size = Tools.random(SIZE.MIN, SIZE.MAX);
     this.spin = Tools.random(SPIN.MAX, SPIN.MAX);
-    this.band = Math.floor(Tools.random(NUM_BANDS));
+    // this.band = Math.floor(Tools.random(NUM_BANDS));
     if (Tools.random() < 0.5) {
       this.spin = -this.spin;
     }
@@ -159,13 +175,31 @@ export default class Capsule {
     // ctx.fillStyle = this.hexToRgba(this.color, .25);
     ctx.stroke();
 
-    // // Text rendering code starts here
+    // // // Text rendering code starts here
     // ctx.font = ".5px Arial"; // Set the font size and font-family as you need
     // ctx.fillStyle = "#ffffff"; // Set the fill color for the text
     // ctx.textAlign = "center"; // Center align the text
     // ctx.textBaseline = "middle"; // Vertical alignment to middle
-    // ctx.fillText(this._num, 0, 0); // Render the text in the middle of the capsule
+    // ctx.fillText(this.label === "" ? this._num : this.label, 0, 0); // Render the text in the middle of the capsule
+    // ctx.drawImage(this.offscreenCanvas, 0, 0);
 
     return ctx.restore();
   }
+
+  // drawText() {
+  //   // Draw the text onto the off-screen canvas
+  //   this.offscreenCtx.font = "20px Arial"; // Set the font size and style
+  //   this.offscreenCtx.fillStyle = "#ffffff"; // Set the text color
+  //   this.offscreenCtx.textAlign = "center";
+  //   this.offscreenCtx.textBaseline = "middle";
+  //   this.offscreenCtx.fillText(
+  //     this._num.toString(),
+  //     this.offscreenCanvas.width / 2,
+  //     this.offscreenCanvas.height / 2
+  //   );
+  // }
+
+  // // Add properties for the off-screen canvas and context
+  // private offscreenCanvas: HTMLCanvasElement;
+  // private offscreenCtx: CanvasRenderingContext2D;
 }

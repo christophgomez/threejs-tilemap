@@ -41,7 +41,7 @@ export default ({
   canRotate = true,
   cardContent,
   overrideBodyAlign,
-  constrainWidth,
+  constrainWidth = true,
   mediaWindowSX = {},
   backgroundShadow = "dark",
   borderColor = "dark",

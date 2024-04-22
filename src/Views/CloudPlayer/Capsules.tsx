@@ -23,8 +23,11 @@ import {
   FormControl,
   Slider,
   IconButton,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import ColorPicker from "../../Components/UI/ColorPicker";
 
 function SelectInputCombo() {
   const [selectValue, setSelectValue] = React.useState("");
@@ -68,9 +71,9 @@ function SelectInputCombo() {
 export default ({
   trackAnalysis,
   player,
-  numSegments = 200,
-  numBeats = 200,
-  numTatums = 200,
+  numSegments = 75,
+  numBeats = 75,
+  numTatums = 75,
   togglePlayerControls,
 }: {
   togglePlayerControls?: (toggled?: boolean) => void;
@@ -80,6 +83,193 @@ export default ({
   numBeats?: number;
   numTatums?: number;
 }) => {
+  const [sNumSegments, setSNumSegments] = React.useState(numSegments);
+  const [sNumBeats, setSNumBeats] = React.useState(numBeats);
+  const [sNumTatums, setSNumTatums] = React.useState(numTatums);
+
+  const [tatumsColor, setTatumsColor] = React.useState<"random" | string>(
+    "random"
+  );
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0 && tatumsColor !== "") {
+      capsules
+        .filter((c) => c.data["feature"].includes("tatums"))
+        .forEach((c) => {
+          if (tatumsColor === "random") c.resetColor();
+          else c.color = tatumsColor;
+        });
+    }
+  }, [tatumsColor]);
+
+  const [beatsColor, setBeatsColor] = React.useState<"random" | string>(
+    "random"
+  );
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0 && beatsColor !== "") {
+      capsules
+        .filter((c) => c.data["feature"].includes("beats"))
+        .forEach((c) => {
+          if (beatsColor === "random") c.resetColor();
+          else c.color = beatsColor;
+        });
+    }
+  }, [beatsColor]);
+
+
+  const [segmentsColor, setSegmentsColor] = React.useState<"random" | string>(
+    "random"
+  );
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0 && segmentsColor !== "") {
+      capsules
+        .filter((c) => c.data["feature"].includes("segments"))
+        .forEach((c) => {
+          if (segmentsColor === "random") c.resetColor();
+          else c.color = segmentsColor;
+        });
+    }
+  }, [segmentsColor]);
+
+  React.useEffect(() => {
+    setSNumSegments(numSegments);
+  }, [numSegments]);
+
+  React.useEffect(() => {
+    setSNumBeats(numBeats);
+  }, [numBeats]);
+
+  React.useEffect(() => {
+    setSNumTatums(numTatums);
+  }, [numTatums]);
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0) {
+      const tatumCapsules = capsules.filter((c) =>
+        c.data["feature"].includes("tatums")
+      );
+      if (tatumCapsules.length < sNumTatums) {
+        const newCapsules = [];
+        for (let i = tatumCapsules.length; i < sNumTatums; i++) {
+          const capsule = createCapsule("tatums", "Tatum", tatumsColor);
+          newCapsules.push(capsule);
+        }
+
+        setCapsules([...capsules, ...newCapsules]);
+      } else if (tatumCapsules.length > sNumTatums) {
+        // Calculate how many capsules need to be removed
+        const numToRemove = tatumCapsules.length - sNumTatums;
+
+        // Filter out the capsules to remove
+        let removedCount = 0;
+        const updatedCapsules = capsules.filter((capsule) => {
+          if (
+            capsule.data["feature"].includes("tatums") &&
+            removedCount < numToRemove
+          ) {
+            removedCount++;
+            return false; // Exclude this capsule
+          }
+          return true; // Include this capsule
+        });
+
+        setCapsules(updatedCapsules);
+      }
+    }
+  }, [sNumTatums]);
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0) {
+      const beatCapsules = capsules.filter((c) =>
+        c.data["feature"].includes("beats")
+      );
+      if (beatCapsules.length < sNumBeats) {
+        const newCapsules = [];
+        for (let i = beatCapsules.length; i < sNumBeats; i++) {
+          const capsule = createCapsule("beats", "Beat", beatsColor);
+          newCapsules.push(capsule);
+        }
+
+        setCapsules([...capsules, ...newCapsules]);
+      } else if (beatCapsules.length > sNumBeats) {
+        // Calculate how many capsules need to be removed
+        const numToRemove = beatCapsules.length - sNumBeats;
+
+        // Filter out the capsules to remove
+        let removedCount = 0;
+        const updatedCapsules = capsules.filter((capsule) => {
+          if (
+            capsule.data["feature"].includes("beats") &&
+            removedCount < numToRemove
+          ) {
+            removedCount++;
+            return false; // Exclude this capsule
+          }
+          return true; // Include this capsule
+        });
+
+        setCapsules(updatedCapsules);
+      }
+    }
+  }, [sNumBeats]);
+
+  React.useEffect(() => {
+    if (capsules !== undefined && capsules.length > 0) {
+      const segCapsules = capsules.filter((c) =>
+        c.data["feature"].includes("segments")
+      );
+      if (segCapsules.length < sNumSegments) {
+        const newCapsules = [];
+        for (let i = segCapsules.length; i < sNumSegments; i++) {
+          const capsule = createCapsule("segments", "Segment", segmentsColor);
+          const timbreIndex = i % 12;
+          capsule.data["timbre"] = timbreIndex;
+          newCapsules.push(capsule);
+        }
+
+        setCapsules([...capsules, ...newCapsules]);
+      } else if (segCapsules.length > sNumSegments) {
+        // Calculate how many capsules need to be removed
+        const numToRemove = segCapsules.length - sNumSegments;
+
+        // Filter out the capsules to remove
+        let removedCount = 0;
+        const updatedCapsules = capsules.filter((capsule) => {
+          if (
+            capsule.data["feature"].includes("segments") &&
+            removedCount < numToRemove
+          ) {
+            removedCount++;
+            return false; // Exclude this capsule
+          }
+          return true; // Include this capsule
+        });
+
+        setCapsules(updatedCapsules);
+      }
+    }
+  }, [sNumSegments]);
+
+  function createCapsule(type, label = "", color = null) {
+    if (canvasRef.current) {
+      const x = Tools.random(0, canvasRef.current.width);
+      const y = Tools.random(0, canvasRef.current.height);
+      const capsule = new Capsule(
+        x,
+        y,
+        color === "random" ? null : color,
+        label
+      );
+      capsule.data["feature"] = [type];
+      capsule.data["shouldLerpEnergy"] = true;
+      return capsule;
+    } else {
+      return null;
+    }
+  }
+
   const [active, setActive] = React.useState(false);
   const activeRef = React.useRef(active);
 
@@ -173,9 +363,11 @@ export default ({
   const [animationManager, setAnimationManager] =
     React.useState<AnimationManager>(null);
   const animMan = React.useRef<AnimationManager>(null);
+
   React.useEffect(() => {
     animMan.current = animationManager;
   }, [animationManager]);
+
   const animID = React.useRef<string>(null);
 
   React.useEffect(() => {
@@ -213,43 +405,22 @@ export default ({
       heightRef.current = canvasRef.current.height;
       widthRef.current = canvasRef.current.width;
 
-      let capsule: Capsule, x: number, y: number;
       const capsules = [];
 
-      for (let i = 0; i < numBeats; i++) {
-        x = Tools.random(0, canvasRef.current.width);
-        y = Tools.random(0, canvasRef.current.height);
-        capsule = new Capsule(x, y);
-        // capsule.energy = 1;
-        capsule.data["feature"] = ["beats"];
-
-        // capsule.data["feature"] = ["segments"];
-        capsule.data["shouldLerpEnergy"] = true;
+      for (let i = 0; i < sNumBeats; i++) {
+        const capsule = createCapsule("beats", "Beat", beatsColor);
         capsules.push(capsule);
       }
 
-      for (let i = 0; i < numTatums; i++) {
-        x = Tools.random(0, canvasRef.current.width);
-        y = Tools.random(0, canvasRef.current.height);
-        capsule = new Capsule(x, y);
-        // capsule.energy = 1;
-        capsule.data["feature"] = ["tatums"];
-
-        // capsule.data["feature"] = ["segments"];
-        capsule.data["shouldLerpEnergy"] = true;
+      for (let i = 0; i < sNumTatums; i++) {
+        const capsule = createCapsule("tatums", "Tatum", tatumsColor);
         capsules.push(capsule);
       }
 
-      for (let i = 0; i < numSegments; i++) {
-        x = Tools.random(0, canvasRef.current.width);
-        y = Tools.random(0, canvasRef.current.height);
-        capsule = new Capsule(x, y);
-
-        capsule.data["feature"] = ["segments"];
-        // const segmentIndex = Math.floor(i / 12);
+      for (let i = 0; i < sNumSegments; i++) {
+        const capsule = createCapsule("segments", "Segment", segmentsColor);
         const timbreIndex = i % 12;
         capsule.data["timbre"] = timbreIndex;
-
         // if (segmentIndex < trackAnalysis.segments.length) {
         //   const segment = trackAnalysis.segments[segmentIndex];
         //   const maxTimbre = Math.max(...segment.timbre);
@@ -259,15 +430,15 @@ export default ({
         //   );
         // }
 
-        // capsule.data["feature"] = ["segments"];
-        capsule.data["shouldLerpEnergy"] = true;
         capsules.push(capsule);
       }
+
       setCapsules(capsules);
 
-      if (!animMan.current) {
-        animMan.current = new AnimationManager();
-        animID.current = animMan.current.addOnAnimateListener(update);
+      if (!animationManager) {
+        const anim = new AnimationManager();
+        animID.current = anim.addOnAnimateListener(update);
+        setAnimationManager(anim);
       }
     }
 
@@ -278,14 +449,14 @@ export default ({
     activeRef.current = active;
   }, [active]);
 
-  const [info, setInfo] = React.useState("");
+  // const [info, setInfo] = React.useState("");
 
-  const [showingInfo, setShowingInfo] = React.useState(false);
-  const showingInfoRef = React.useRef(showingInfo);
+  // const [showingInfo, setShowingInfo] = React.useState(false);
+  // const showingInfoRef = React.useRef(showingInfo);
 
-  React.useEffect(() => {
-    showingInfoRef.current = showingInfo;
-  }, [showingInfo]);
+  // React.useEffect(() => {
+  //   showingInfoRef.current = showingInfo;
+  // }, [showingInfo]);
 
   const [menuShowing, setMenuShowing] = React.useState(false);
   const menuShowingRef = React.useRef(menuShowing);
@@ -312,16 +483,19 @@ export default ({
     };
   }, []);
 
-  const [beatConfidence, setBeatConfidence] = React.useState(0.5);
-  const [segmentConfidence, setSegConfidence] = React.useState(0.5);
+  const [tatumConfidence, setTatumConfidence] = React.useState(0.15);
+  const [beatConfidence, setBeatConfidence] = React.useState(0.15);
+  const [segmentConfidence, setSegConfidence] = React.useState(0.15);
 
+  const tatumConfidenceRef = React.useRef(tatumConfidence);
   const beatConfidenceRef = React.useRef(beatConfidence);
   const segmentConfidenceRef = React.useRef(segmentConfidence);
 
   React.useEffect(() => {
+    tatumConfidenceRef.current = tatumConfidence;
     beatConfidenceRef.current = beatConfidence;
     segmentConfidenceRef.current = segmentConfidence;
-  }, [beatConfidence, segmentConfidence]);
+  }, [tatumConfidence, beatConfidence, segmentConfidence]);
 
   const [transparancyModifier, setTransparencyModifier] = React.useState<
     "Constant" | "Dynamic"
@@ -385,14 +559,19 @@ export default ({
               if (capsules.length > 0) {
                 for (const capsule of capsules) {
                   if (
-                    (feature === "beats" || feature === "tatums") &&
+                    feature === "tatums" &&
+                    current.confidence >= tatumConfidenceRef.current
+                  ) {
+                    capsule.data["shouldLerpEnergy"] = false;
+                    capsule.energy = Tools.random(0.5, 1);
+                  }
+
+                  if (
+                    feature === "beats" &&
                     current.confidence >= beatConfidenceRef.current
                   ) {
                     capsule.data["shouldLerpEnergy"] = false;
-                    capsule.energy = Tools.random(
-                      feature === "beats" ? 1.5 : 0.5,
-                      feature === "beats" ? 2 : 1
-                    );
+                    capsule.energy = Tools.random(1.5, 2);
                   }
 
                   if (
@@ -420,7 +599,7 @@ export default ({
                       minTimbre.current,
                       maxTimbre.current,
                       0,
-                      current.confidence > 0.35 ? 2.5 : 1
+                      current.confidence >= 0.15 ? 2.5 : 1
                     );
 
                     capsule.energy = normalizedTimbreValue;
@@ -431,6 +610,11 @@ export default ({
           }
         });
       }
+      //  else if (trackAnalysis && player && paused) {
+      //   capsulesRef.current.forEach((c) => {
+      //     c.energy = 0;
+      //   });
+      // }
 
       // Clear the canvas
       ctxRef.current.clearRect(
@@ -462,13 +646,30 @@ export default ({
         }
 
         // recycle capsules
-        if (capsule.y < -capsule.size * capsule.level * capsule.scale) {
+        if (
+          capsule.y < 0 ||
+          capsule.y > canvasRef.current.height ||
+          capsule.x < 0 ||
+          capsule.x > canvasRef.current.width
+        ) {
           capsule.reset();
-          capsule.x = Tools.random(0, canvasRef.current.width);
-          capsule.y =
-            canvasRef.current.height +
-            capsule.size * capsule.scale * capsule.level;
-          // capsule.y = Tools.random(heightRef.current);
+          if (capsule.y < 0) {
+            // Exited from the top, reappear at the bottom
+            capsule.y = canvasRef.current.height;
+            capsule.x = Tools.random(0, canvasRef.current.width);
+          } else if (capsule.y > canvasRef.current.height) {
+            // Exited from the bottom, reappear at the top
+            capsule.y = 0;
+            capsule.x = Tools.random(0, canvasRef.current.width);
+          } else if (capsule.x < 0) {
+            // Exited from the left, reappear on the right
+            capsule.x = canvasRef.current.width;
+            capsule.y = Tools.random(0, canvasRef.current.height);
+          } else if (capsule.x > canvasRef.current.width) {
+            // Exited from the right, reappear on the left
+            capsule.x = 0;
+            capsule.y = Tools.random(0, canvasRef.current.height);
+          }
         }
 
         // Move the capsule to new position
@@ -482,7 +683,7 @@ export default ({
 
   return (
     <>
-      {showingInfo && (
+      {/* {showingInfo && (
         <div
           style={{
             position: "absolute",
@@ -500,7 +701,7 @@ export default ({
         >
           {info}
         </div>
-      )}
+      )} */}
       {menuShowing && (
         <HoverCardMenu
           headerAction={
@@ -520,249 +721,431 @@ export default ({
           menus={[
             {
               title: "Settings",
+              minWidth: 400,
+              constrainWidth: false,
               content: (
                 <>
-                  <Box sx={{ display: "flex", flexFlow: "column" }}>
-                    <div style={{ display: "flex", flexFlow: "column" }}>
-                      <Typography sx={{ margin: ".5em 0" }}>
-                        Visualizer Global Properties
+                  <div style={{ display: "flex", flexFlow: "column" }}>
+                    <Typography
+                      sx={{ margin: "0", textAlign: "left" }}
+                      variant="body2"
+                    >
+                      Tatum Capsules
+                    </Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                      className="input-container"
+                    >
+                      <Typography
+                        sx={{
+                          margin: "0",
+                          marginBottom: 1,
+                          textAlign: "left",
+                        }}
+                        variant="body2"
+                      >
+                        Amount
                       </Typography>
-
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Tatum Capsules
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            padding: 12,
-                            justifyContent: "center",
-                            justifyItems: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                          }}
-                          className="input-container"
-                        >
-                          <input
-                            type="number"
-                            id="num-tatums"
-                            name="num-tatums"
-                            placeholder=""
-                            autoComplete="off"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                          />
-                          <label htmlFor="num-tatums">Amount</label>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Beat Capsules
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            padding: 12,
-                            justifyContent: "center",
-                            justifyItems: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                          }}
-                          className="input-container"
-                        >
-                          <input
-                            type="number"
-                            id="num-beats"
-                            name="num-beats"
-                            placeholder=""
-                            autoComplete="off"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                          />
-                          <label htmlFor="num-beats">Amount</label>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Segment Capsules
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            padding: 12,
-                            justifyContent: "center",
-                            justifyItems: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                          }}
-                          className="input-container"
-                        >
-                          <input
-                            type="number"
-                            id="num-segments"
-                            name="num-segments"
-                            placeholder=""
-                            autoComplete="off"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                          />
-                          <label htmlFor="num-segments">Amount</label>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Beat Confidence
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            padding: 12,
-                            justifyContent: "center",
-                            justifyItems: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Slider
-                            aria-label="Beat Confidence"
-                            valueLabelDisplay="auto"
-                            step={0.1}
-                            marks
-                            min={0}
-                            max={1}
-                            slotProps={{
-                              root: {
-                                onMouseDown: (e) => e.stopPropagation(),
-                                onTouchStart: (e) => e.stopPropagation(),
-                              },
-                            }}
-                            value={beatConfidence}
-                            onChange={(e, v) => setBeatConfidence(v as number)}
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Segment Confidence
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            padding: 12,
-                            justifyContent: "center",
-                            justifyItems: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Slider
-                            aria-label="Segment Confidence"
-                            valueLabelDisplay="auto"
-                            step={0.1}
-                            marks
-                            min={0}
-                            max={1}
-                            slotProps={{
-                              root: {
-                                onMouseDown: (e) => e.stopPropagation(),
-                                onTouchStart: (e) => e.stopPropagation(),
-                              },
-                            }}
-                            value={segmentConfidence}
-                            onChange={(e, v) => setSegConfidence(v as number)}
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", flexFlow: "column" }}>
-                        <Typography
-                          sx={{ margin: "0", textAlign: "left" }}
-                          variant="body2"
-                        >
-                          Capsule Alpha
-                        </Typography>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexFlow: "row",
-                            alignItems: "center",
-                            justifyContent:
-                              transparancyModifier === "Dynamic"
-                                ? "center"
-                                : "normal",
-                            padding: "12px",
-                          }}
-                        >
-                          <Dropdown
-                            color="black"
-                            style={{
-                              boxShadow: "none",
-                              margin: "0",
-                              marginRight:
-                                transparancyModifier === "Constant" ? "1em" : 0,
-                            }}
-                            noBlur={true}
-                            toggleText={transparancyModifier}
-                            options={[
-                              {
-                                label: "Dynamic",
-                                onClick: () => {
-                                  setTransparencyModifier("Dynamic");
-                                },
-                              },
-                              {
-                                label: "Constant",
-                                onClick: () => {
-                                  setTransparencyModifier("Constant");
-                                },
-                              },
-                            ]}
-                          />
-                          {transparancyModifier === "Constant" && (
-                            <Slider
-                              aria-label="Transparency"
-                              valueLabelDisplay="auto"
-                              step={0.1}
-                              marks
-                              min={0}
-                              max={1}
-                              value={transparencyValue}
-                              slotProps={{
-                                root: {
-                                  onMouseDown: (e) => e.stopPropagation(),
-                                  onTouchStart: (e) => e.stopPropagation(),
-                                },
-                              }}
-                              onChange={(e, v) =>
-                                setTransparencyValue(v as number)
-                              }
-                            />
-                          )}
-                        </div>
-                      </div>
+                      <input
+                        type="number"
+                        id="num-tatums"
+                        name="num-tatums"
+                        placeholder=""
+                        autoComplete="off"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        value={sNumTatums}
+                        onChange={(e) =>
+                          setSNumTatums(parseInt(e.target.value))
+                        }
+                      />
+                      <label htmlFor="num-tatums">Amount</label>
                     </div>
-                  </Box>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Confidence - {tatumConfidence.toFixed(2)}
+                      </Typography>
+                      <Slider
+                        aria-label="Tatum Confidence"
+                        valueLabelDisplay="auto"
+                        step={0.01}
+                        marks
+                        min={0}
+                        max={1}
+                        slotProps={{
+                          root: {
+                            onMouseDown: (e) => e.stopPropagation(),
+                            onTouchStart: (e) => e.stopPropagation(),
+                          },
+                        }}
+                        value={tatumConfidence}
+                        onChange={(e, v) => setTatumConfidence(v as number)}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Color{" "}
+                        {tatumsColor !== "random" &&
+                          tatumsColor !== "" &&
+                          ` - ${tatumsColor}`}
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={tatumsColor === "random"}
+                            onChange={(e) =>
+                              setTatumsColor(e.target.checked ? "random" : "")
+                            }
+                          />
+                        }
+                        label="Random"
+                      />
+                      {tatumsColor !== "random" && (
+                        <ColorPicker
+                          color={tatumsColor}
+                          onChange={(color) => setTatumsColor(color)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexFlow: "column" }}>
+                    <Typography
+                      sx={{ margin: "0", textAlign: "left" }}
+                      variant="body2"
+                    >
+                      Beat Capsules
+                    </Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                      className="input-container"
+                    >
+                      <Typography
+                        sx={{
+                          margin: "0",
+                          marginBottom: 1,
+                          textAlign: "left",
+                        }}
+                        variant="body2"
+                      >
+                        Amount
+                      </Typography>
+                      <input
+                        type="number"
+                        id="num-beats"
+                        name="num-beats"
+                        placeholder=""
+                        autoComplete="off"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        value={sNumBeats}
+                        onChange={(e) => setSNumBeats(parseInt(e.target.value))}
+                      />
+                      <label htmlFor="num-beats">Amount</label>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        justifyItems: "center",
+                        alignContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Confidence - {beatConfidence.toFixed(2)}
+                      </Typography>
+                      <Slider
+                        aria-label="Beat Confidence"
+                        valueLabelDisplay="auto"
+                        step={0.01}
+                        marks
+                        min={0}
+                        max={1}
+                        slotProps={{
+                          root: {
+                            onMouseDown: (e) => e.stopPropagation(),
+                            onTouchStart: (e) => e.stopPropagation(),
+                          },
+                        }}
+                        value={beatConfidence}
+                        onChange={(e, v) => setBeatConfidence(v as number)}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Color{" "}
+                        {beatsColor !== "random" &&
+                          beatsColor !== "" &&
+                          ` - ${beatsColor}`}
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={beatsColor === "random"}
+                            onChange={(e) =>
+                              setBeatsColor(e.target.checked ? "random" : "")
+                            }
+                          />
+                        }
+                        label="Random"
+                      />
+                      {beatsColor !== "random" && (
+                        <ColorPicker
+                          color={beatsColor}
+                          onChange={(color) => setBeatsColor(color)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexFlow: "column" }}>
+                    <Typography
+                      sx={{
+                        margin: "0",
+                        textAlign: "left",
+                      }}
+                      variant="body2"
+                    >
+                      Segment Capsules
+                    </Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        justifyItems: "center",
+                        alignContent: "center",
+                        alignItems: "center",
+                      }}
+                      className="input-container"
+                    >
+                      <Typography
+                        sx={{
+                          margin: "0",
+                          marginBottom: 1,
+                          textAlign: "left",
+                        }}
+                        variant="body2"
+                      >
+                        Amount
+                      </Typography>
+                      <input
+                        type="number"
+                        id="num-segments"
+                        name="num-segments"
+                        placeholder=""
+                        autoComplete="off"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        value={sNumSegments}
+                        onChange={(e) =>
+                          setSNumSegments(parseInt(e.target.value))
+                        }
+                      />
+                      <label htmlFor="num-segments">Amount</label>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        alignItems: "center",
+                        justifyItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Confidence - {segmentConfidence.toFixed(2)}
+                      </Typography>
+                      <Slider
+                        aria-label="Segment Confidence"
+                        valueLabelDisplay="auto"
+                        step={0.01}
+                        marks
+                        min={0}
+                        max={1}
+                        slotProps={{
+                          root: {
+                            onMouseDown: (e) => e.stopPropagation(),
+                            onTouchStart: (e) => e.stopPropagation(),
+                          },
+                        }}
+                        value={segmentConfidence}
+                        onChange={(e, v) => setSegConfidence(v as number)}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "column",
+                        padding: 12,
+                        justifyContent: "center",
+                        alignContent: "center",
+                        justifyItems: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{ margin: "0", textAlign: "left" }}
+                        variant="body2"
+                      >
+                        Color{" "}
+                        {segmentsColor !== "random" &&
+                          segmentsColor !== "" &&
+                          ` - ${segmentsColor}`}
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={segmentsColor === "random"}
+                            onChange={(e) =>
+                              setSegmentsColor(e.target.checked ? "random" : "")
+                            }
+                          />
+                        }
+                        label="Random"
+                      />
+                      {segmentsColor !== "random" && (
+                        <ColorPicker
+                          color={segmentsColor}
+                          onChange={(color) => setSegmentsColor(color)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexFlow: "column" }}>
+                    <Typography
+                      sx={{ margin: "0", textAlign: "left" }}
+                      variant="body2"
+                    >
+                      Capsule Alpha
+                    </Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexFlow: "row",
+                        alignItems: "center",
+                        justifyContent:
+                          transparancyModifier === "Dynamic"
+                            ? "center"
+                            : "normal",
+                        padding: "12px",
+                      }}
+                    >
+                      <Dropdown
+                        color="black"
+                        style={{
+                          boxShadow: "none",
+                          margin: "0",
+                          marginRight:
+                            transparancyModifier === "Constant" ? "1em" : 0,
+                        }}
+                        noBlur={true}
+                        toggleText={transparancyModifier}
+                        options={[
+                          {
+                            label: "Dynamic",
+                            onClick: () => {
+                              setTransparencyModifier("Dynamic");
+                            },
+                          },
+                          {
+                            label: "Constant",
+                            onClick: () => {
+                              setTransparencyModifier("Constant");
+                            },
+                          },
+                        ]}
+                      />
+                      {transparancyModifier === "Constant" && (
+                        <Slider
+                          aria-label="Transparency"
+                          valueLabelDisplay="auto"
+                          step={0.1}
+                          marks
+                          min={0}
+                          max={1}
+                          value={transparencyValue}
+                          slotProps={{
+                            root: {
+                              onMouseDown: (e) => e.stopPropagation(),
+                              onTouchStart: (e) => e.stopPropagation(),
+                            },
+                          }}
+                          onChange={(e, v) => setTransparencyValue(v as number)}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </>
               ),
             },

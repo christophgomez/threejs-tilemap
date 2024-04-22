@@ -70,9 +70,9 @@ export const Tools = {
    */
   random: function (min, max) {
     if (max === undefined) {
-      return Math.random() * min - min * 0.5;
+      (max = min || 1), (min = 0);
     }
-    return Math.random() * (max - min) + min;
+    return min + Math.random() * (max - min);
   },
 
   noise1: function (nx, ny) {
@@ -259,11 +259,11 @@ export const Tools = {
       } else if (this.status !== 0) {
         console.warn(
           "[Tools.getJSON] Error: " +
-          this.status +
-          " (" +
-          this.statusText +
-          ") :: " +
-          config.url
+            this.status +
+            " (" +
+            this.statusText +
+            ") :: " +
+            config.url
         );
       }
     };
@@ -299,7 +299,10 @@ export const Tools = {
     return (1 - factor) * start + factor * end;
   },
   isMeshInView(mesh, camera, percentageThreshold = 1) {
-    cameraViewProjectionMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    cameraViewProjectionMatrix.multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse
+    );
     frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
 
     // Calculate the intersection between the mesh's bounding box and the frustum
@@ -313,7 +316,8 @@ export const Tools = {
     }
 
     // Calculate the volume ratio of the intersection
-    const intersectionVolume = tileBoundingSphere.radius * tileBoundingSphere.radius * Math.PI * 4 / 3;
+    const intersectionVolume =
+      (tileBoundingSphere.radius * tileBoundingSphere.radius * Math.PI * 4) / 3;
     const size = tileBoundingBox.getSize(_sizeVec1);
     const totalVolume = size.x * size.y * size.z;
     const volumeRatio = intersectionVolume / totalVolume;
@@ -336,30 +340,28 @@ export const Tools = {
     return position;
   },
   /**
- * A linear interpolator for hex colors.
- *
- * Based on:
- * https://gist.github.com/rosszurowski/67f04465c424a9bc0dae
- *
- * @param {Number} a  (hex color start val)
- * @param {Number} b  (hex color end val)
- * @param {Number} amount  (the amount to fade from a to b)
- *
- * @example
- * // returns 0x7f7f7f
- * lerpHex(0x000000, 0xffffff, 0.5)
- *
- * @returns {Number}
- */
+   * A linear interpolator for hex colors.
+   *
+   * Based on:
+   * https://gist.github.com/rosszurowski/67f04465c424a9bc0dae
+   *
+   * @param {Number} a  (hex color start val)
+   * @param {Number} b  (hex color end val)
+   * @param {Number} amount  (the amount to fade from a to b)
+   *
+   * @example
+   * // returns 0x7f7f7f
+   * lerpHex(0x000000, 0xffffff, 0.5)
+   *
+   * @returns {Number}
+   */
   lerpHex(a, b, amount) {
     const ar = a >> 16,
-      ag = a >> 8 & 0xff,
+      ag = (a >> 8) & 0xff,
       ab = a & 0xff,
-
       br = b >> 16,
-      bg = b >> 8 & 0xff,
+      bg = (b >> 8) & 0xff,
       bb = b & 0xff,
-
       rr = ar + amount * (br - ar),
       rg = ag + amount * (bg - ag),
       rb = ab + amount * (bb - ab);
@@ -374,12 +376,15 @@ export const Tools = {
   },
 
   /**
-   * 
-   * @param {number} radius 
-   * @param {import("../env/MeshEntity").EntityOptionParams} opts 
-   * @returns 
+   *
+   * @param {number} radius
+   * @param {import("../env/MeshEntity").EntityOptionParams} opts
+   * @returns
    */
-  createSphereEntity(radius = 4, opts = { heightOffset: 1, baseColor: 0xffffff }) {
+  createSphereEntity(
+    radius = 4,
+    opts = { heightOffset: 1, baseColor: 0xffffff }
+  ) {
     let geomKey = radius.toString();
 
     if (!(geomKey in sphereGeomCache)) {
@@ -388,16 +393,18 @@ export const Tools = {
 
     const geometry = sphereGeomCache[geomKey];
 
-    const material = new MeshPhongMaterial({ color: opts.baseColor ?? 0xffffff });
+    const material = new MeshPhongMaterial({
+      color: opts.baseColor ?? 0xffffff,
+    });
     const sphereMesh = new MeshEntity("sphere", geometry, material, opts);
     return sphereMesh;
   },
 
   /**
-   * 
-   * @param {number} size 
-   * @param {import("../env/MeshEntity").EntityOptionParams} opts 
-   * @returns 
+   *
+   * @param {number} size
+   * @param {import("../env/MeshEntity").EntityOptionParams} opts
+   * @returns
    */
   createCubeEntity(size = 2, opts = { baseColor: 0xffffff, heightOffset: 1 }) {
     let geomKey = size.toString();
@@ -408,59 +415,82 @@ export const Tools = {
 
     const geometry = boxGeomCache[geomKey];
 
-    const material = new MeshPhongMaterial({ color: opts.baseColor ?? 0xffffff });
+    const material = new MeshPhongMaterial({
+      color: opts.baseColor ?? 0xffffff,
+    });
     const cubeMesh = new MeshEntity("cube", geometry, material, opts);
     return cubeMesh;
   },
   /**
-   * 
-   * @param {number} length 
-   * @param {number} width 
-   * @param {number} depth 
-   * @param {import("../env/MeshEntity").EntityOptionParams} opts 
-   * @returns 
+   *
+   * @param {number} length
+   * @param {number} width
+   * @param {number} depth
+   * @param {import("../env/MeshEntity").EntityOptionParams} opts
+   * @returns
    */
-  createRectEntity(length = 4, width = 1, depth = 1, opts = { baseColor: 0xffffff, heightOffset: 1 }) {
+  createRectEntity(
+    length = 4,
+    width = 1,
+    depth = 1,
+    opts = { baseColor: 0xffffff, heightOffset: 1 }
+  ) {
     let geomKey = length + "-" + width + "-" + depth;
 
     if (!(geomKey in boxGeomCache)) {
       boxGeomCache[geomKey] = new BoxBufferGeometry(depth, length, width);
-      boxGeomCache[geomKey].rotateX(Math.PI * .5);
+      boxGeomCache[geomKey].rotateX(Math.PI * 0.5);
     }
 
     const geometry = boxGeomCache[geomKey];
 
-    const material = new MeshPhongMaterial({ color: opts.baseColor ?? 0xffffff });
+    const material = new MeshPhongMaterial({
+      color: opts.baseColor ?? 0xffffff,
+    });
 
     const cubeMesh = new MeshEntity("rect", geometry, material, opts);
     cubeMesh.up.set(0, 1, 0);
 
-
     return cubeMesh;
   },
   /**
-   * 
-   * @param {number} radiusTop 
-   * @param {number} radiusBottom 
-   * @param {number} height 
-   * @param {import("../env/MeshEntity").EntityOptionParams} opts 
-   * @returns 
+   *
+   * @param {number} radiusTop
+   * @param {number} radiusBottom
+   * @param {number} height
+   * @param {import("../env/MeshEntity").EntityOptionParams} opts
+   * @returns
    */
-  createCylinderEntity(radiusTop, radiusBottom, height, opts = { baseColor: 0xffffff, heightOffset: 1 }) {
+  createCylinderEntity(
+    radiusTop,
+    radiusBottom,
+    height,
+    opts = { baseColor: 0xffffff, heightOffset: 1 }
+  ) {
     let geomKey = radiusTop + "-" + radiusBottom + "-" + height;
 
     if (!(geomKey in cylinderGeomCache)) {
-      cylinderGeomCache[geomKey] = new CylinderBufferGeometry(radiusTop, radiusBottom, height, 32);
+      cylinderGeomCache[geomKey] = new CylinderBufferGeometry(
+        radiusTop,
+        radiusBottom,
+        height,
+        32
+      );
       // cylinderGeomCache[geomKey].rotateX(Math.PI * .5);
     }
 
     const geometry = cylinderGeomCache[geomKey];
 
-    const material = new MeshPhongMaterial({ color: opts.baseColor ?? 0xffffff, reflectivity: 1, refractionRatio: 1, flatShading: false, shininess: 100 });
+    const material = new MeshPhongMaterial({
+      color: opts.baseColor ?? 0xffffff,
+      reflectivity: 1,
+      refractionRatio: 1,
+      flatShading: false,
+      shininess: 100,
+    });
 
     const cubeMesh = new MeshEntity("rect", geometry, material, opts);
     cubeMesh.up.set(0, 1, 0);
-
 
     return cubeMesh;
   },
@@ -468,9 +498,11 @@ export const Tools = {
   // Function to download data to a file
   download(data, filename, type) {
     var file = new Blob([data], { type: type });
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
+    if (window.navigator.msSaveOrOpenBlob)
+      // IE10+
       window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
+    else {
+      // Others
       var a = document.createElement("a"),
         url = URL.createObjectURL(file);
       a.href = url;
@@ -495,9 +527,8 @@ export const Tools = {
     currentVelocityRef,
     smoothTime,
     maxSpeed = Infinity,
-    deltaTime,
+    deltaTime
   ) {
-
     // Based on Game Programming Gems 4 Chapter 1.10
     smoothTime = Math.max(0.0001, smoothTime);
     const omega = 2 / smoothTime;
@@ -509,7 +540,7 @@ export const Tools = {
 
     // Clamp maximum speed
     const maxChange = maxSpeed * smoothTime;
-    change = this.clamp(change, - maxChange, maxChange);
+    change = this.clamp(change, -maxChange, maxChange);
     target = current - change;
 
     const temp = (currentVelocityRef.value + omega * change) * deltaTime;
@@ -518,10 +549,8 @@ export const Tools = {
 
     // Prevent overshooting
     if (originalTo - current > 0.0 === output > originalTo) {
-
       output = originalTo;
       currentVelocityRef.value = (output - originalTo) / deltaTime;
-
     }
 
     return output;
@@ -531,10 +560,10 @@ export const Tools = {
   },
   hexColorToString: (num) => {
     num >>>= 0;
-    var b = num & 0xFF,
-      g = (num & 0xFF00) >>> 8,
-      r = (num & 0xFF0000) >>> 16,
-      a = ((num & 0xFF000000) >>> 24) / 255;
+    var b = num & 0xff,
+      g = (num & 0xff00) >>> 8,
+      r = (num & 0xff0000) >>> 16,
+      a = ((num & 0xff000000) >>> 24) / 255;
     return "rgba(" + [r, g, b, a].join(",") + ")";
   },
   removeDecimals(number, precision = 0) {
@@ -544,13 +573,15 @@ export const Tools = {
     return Math.abs(num1 - num2) <= threshold;
   },
   areSequentialNumbers(numbers) {
-    return numbers.every((number, index, array) => index === 0 || number === array[index - 1] + 1);
+    return numbers.every(
+      (number, index, array) => index === 0 || number === array[index - 1] + 1
+    );
   },
   createSeeThroughMaterial() {
     // Create a ShaderMaterial with a custom fragment shader
     const customMaterial = new ShaderMaterial({
       uniforms: {
-        collisionOccurred: { type: 'i', value: 0 }, // Uniform to control transparency
+        collisionOccurred: { type: "i", value: 0 }, // Uniform to control transparency
       },
       vertexShader: `
       // Vertex shader
@@ -586,14 +617,19 @@ export const Tools = {
     return customMaterial;
   },
   /**
-   * 
-   * @param {number} delay 
-   * @param {() => void | undefined} onBegin 
-   * @param {() => void | undefined} onEnd 
-   * @returns 
+   *
+   * @param {number} delay
+   * @param {() => void | undefined} onBegin
+   * @param {() => void | undefined} onEnd
+   * @returns
    */
-  CreatePromiseRoutine(endDelay, beginDelay = 0, onBegin = undefined, onEnd = undefined) {
-    return new Promise(resolve => {
+  CreatePromiseRoutine(
+    endDelay,
+    beginDelay = 0,
+    onBegin = undefined,
+    onEnd = undefined
+  ) {
+    return new Promise((resolve) => {
       setTimeout(() => {
         if (onBegin) onBegin();
 
@@ -603,18 +639,24 @@ export const Tools = {
           resolve();
         }, endDelay);
       }, beginDelay);
-    })
+    });
   },
   /**
-   * 
-   * @param {() => void | undefined} onUp 
-   * @param {() => void | undefined} onDown 
-   * @param {() => void | undefined} onLeft 
-   * @param {() => void | undefined} onRight 
-   * @param {{[keyboardKey: string]: () => void} | undefined} extras 
+   *
+   * @param {() => void | undefined} onUp
+   * @param {() => void | undefined} onDown
+   * @param {() => void | undefined} onLeft
+   * @param {() => void | undefined} onRight
+   * @param {{[keyboardKey: string]: () => void} | undefined} extras
    * @returns {(e: KeyboardEvent) => void}
    */
-  createOnDirectionalInputDownListener(onUp = undefined, onDown = undefined, onLeft = undefined, onRight = undefined, extras = undefined) {
+  createOnDirectionalInputDownListener(
+    onUp = undefined,
+    onDown = undefined,
+    onLeft = undefined,
+    onRight = undefined,
+    extras = undefined
+  ) {
     return (e) => {
       if (e.key === "w" || e.key === "ArrowUp") {
         if (onUp) onUp();
@@ -640,14 +682,14 @@ export const Tools = {
     };
   },
   /**
-   * 
-   * @param {Array} arr 
+   *
+   * @param {Array} arr
    * @returns {any}
    */
   randomElement(arr) {
     const randomElement = arr[Math.floor(Math.random() * arr.length)];
     return randomElement;
-  }
+  },
 };
 
 export default Tools;

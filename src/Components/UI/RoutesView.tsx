@@ -36,6 +36,7 @@ import "./RoutesContainer.css";
 export const RouteMenuButton = ({
   to,
   href,
+  newTab,
   onClick,
   onPointerEnter,
   onPointerLeave,
@@ -43,16 +44,19 @@ export const RouteMenuButton = ({
   children,
   style,
   noMove,
+  disabled,
 }: {
   onPointerLeave?: () => void;
   onPointerEnter?: (enterSide?: string) => void;
   onPointerMove?: (side?: string) => void;
   to?: string;
+  newTab?: boolean;
   href?: string;
   onClick?: () => void;
   children?: string | JSX.Element;
   style?: React.CSSProperties;
   noMove?: boolean;
+  disabled?: boolean;
 }) => {
   const bounds = React.useRef<DOMRect>(null);
   const el = React.useRef<HTMLAnchorElement>(null);
@@ -72,7 +76,10 @@ export const RouteMenuButton = ({
           ref={el}
           className={
             "route-menu-button" +
-            (to === undefined && href === undefined && onClick === undefined
+            ((to === undefined &&
+              href === undefined &&
+              onClick === undefined) ||
+            disabled
               ? " disabled"
               : "") +
             " " +
@@ -126,7 +133,9 @@ export const RouteMenuButton = ({
           ref={el}
           className={
             "route-menu-button" +
-            (href === undefined && onClick === undefined ? " disabled" : "") +
+            ((href === undefined && onClick === undefined) || disabled
+              ? " disabled"
+              : "") +
             " " +
             highlightSide +
             (noMove !== undefined && noMove === true
@@ -140,7 +149,11 @@ export const RouteMenuButton = ({
             if (onClick) onClick();
           }}
           href={href}
-          target={href ? "_blank" : undefined}
+          target={
+            href && (newTab === undefined || newTab === true)
+              ? "_blank"
+              : undefined
+          }
           rel={href ? "noopener noreferrer" : undefined}
           onPointerLeave={() => {
             setHighlightSide("");
@@ -195,8 +208,8 @@ export default ({
   children,
   loading,
   animCompleteLinkSlideDelay = 250,
-  containerBlur: blur = false,
-  containerBackground: background = false,
+  containerBlur = false,
+  containerBackground = false,
   overlayBackground = false,
   overlayBlur = false,
   overlayBlurBackgroundStyle = {
@@ -219,6 +232,7 @@ export default ({
   onPointerLeaveLink?: () => void;
   routes?: Array<{
     to?: string;
+    newTab?: boolean;
     label: string;
     description: string;
     href?: string;
@@ -494,24 +508,28 @@ export default ({
       <div
         className={`overlay ${isMouse ? "mouseInput" : "buttonInput"}`}
         style={{
-          backdropFilter: overlayBlur
-            ? `blur(${overlayBlurBackgroundStyle.blurAmount}px)`
-            : "blur(0px)",
+          backdropFilter:
+            overlayBackground && overlayBlur
+              ? `blur(${overlayBlurBackgroundStyle.blurAmount}px)`
+              : "none",
           backgroundColor: overlayBackground
             ? overlayBlurBackgroundStyle.backgroundColor
-            : "rgba(0,0,0,0)",
+            : "none",
+          background: overlayBackground
+            ? overlayBlurBackgroundStyle.backgroundColor
+            : "none",
         }}
       >
         <div
           ref={containerRef}
           onPointerLeave={() => {
-            if (!linkSlide[linkSlide.length - 1]) return;
+            // if (!linkSlide[linkSlide.length - 1]) return;
 
             setNoneActive(false);
             if (onPointerLeaveLink !== undefined) onPointerLeaveLink();
           }}
           onPointerEnter={() => {
-            if (!linkSlide[linkSlide.length - 1]) return;
+            // if (!linkSlide[linkSlide.length - 1]) return;
 
             if (onPointerEnterLink !== undefined) onPointerEnterLink();
           }}
@@ -522,11 +540,11 @@ export default ({
             alignItems: "center",
             padding: "1em 2em",
             backdropFilter:
-              animOver && blur
+              animOver && containerBlur
                 ? `blur(${containerBlurBackgroundStyle.blurAmount}px)`
                 : "blur(0px)",
             backgroundColor:
-              animOver && background
+              animOver && containerBackground
                 ? containerBlurBackgroundStyle.backgroundColor
                 : "rgba(0,0,0,0)",
             borderRadius: "1em",
@@ -606,13 +624,14 @@ export default ({
                   )} */}
                   <RouteMenuButton
                     key={"routes-button-" + i}
+                    disabled={!linkSlide[linkSlide.length - 1]}
                     {...link}
                     onPointerLeave={() => {
                       if (!linkSlide[linkSlide.length - 1]) return;
 
                       window.clearTimeout(tRef.current);
                       setSide("");
-                      setNoneActive();
+                      setNoneActive(false);
                     }}
                     onPointerEnter={(side) => {
                       if (!linkSlide[linkSlide.length - 1]) return;

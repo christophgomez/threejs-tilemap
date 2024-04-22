@@ -31,25 +31,27 @@ import Shader from "./Shader";
 import "./index.css";
 import VideoCrossfader from "./VideoCrossfader";
 import Capsules from "./Capsules";
-import TextCarousel from "../../Components/UI/TextCarousel";
-import ThreeCanvas from "../../Components/UI/ThreeCanvas";
+// import TextCarousel from "../../Components/UI/TextCarousel";
+// import ThreeCanvas from "../../Components/UI/ThreeCanvas";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
-import { RGBShiftShader } from "three/examples/jsm/shaders/RGBShiftShader";
-import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader";
-import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+import InactivityFader from "../../Components/UI/InactivityFader";
+// import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+// import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
+// import { RGBShiftShader } from "three/examples/jsm/shaders/RGBShiftShader";
+// import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader";
+// import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
 
 export default () => {
-  const [authenticateOpen, setAuthenticateOpen] =
-    React.useState<boolean>(undefined);
+  const [authenticateOpen, setAuthenticateOpen] = React.useState<boolean>(true);
 
-  const [authCode, setAuthCode] = React.useState(null);
-  const authCodeRef = useRef(authCode);
+  // const [authCode, setAuthCode] = React.useState(null);
+  const [link, setLink] = React.useState(null);
+  // const authCodeRef = useRef(authCode);
 
   const [bgLoaded, setBgLoaded] = React.useState(false);
 
   const handleRefreshToken = async () => {
+    // console.log('Handling Refresh Token');
     try {
       const response = await fetch(
         "https://spotilize.uc.r.appspot.com/spotify/access_token/refresh",
@@ -71,6 +73,7 @@ export default () => {
 
       const data = await response.json();
 
+      // console.log('got data', data);
       if (data.success) {
         // setToken(data.access_token); // Assume the token is returned in the access_token property
         return data.access_token;
@@ -84,17 +87,16 @@ export default () => {
     }
   };
 
-  const handleAuthorize = async () => {
+  const handleLink = async () => {
     try {
       const response = await fetch(
-        "https://spotilize.uc.r.appspot.com/spotify/authorize",
+        "https://spotilize.uc.r.appspot.com/spotify/link",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            code: authCodeRef.current,
             app: "CloudPlayer",
           }),
         }
@@ -105,88 +107,106 @@ export default () => {
       }
 
       const data = await response.json();
-      setAuthenticateOpen(false);
 
-      localStorage.setItem("refresh_token", data.refresh_token);
+      // console.log("got link");
+      // console.log(data.link);
 
-      // setToken(data.access_token); // Assume the token is returned in the access_token property
-      return data.access_token;
+      setLink(data.link);
+
+      // // setToken(data.access_token); // Assume the token is returned in the access_token property
+      // return data.access_token;
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
+  // const handleAuthorize = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://spotilize.uc.r.appspot.com/spotify/authorize",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           code: authCodeRef.current,
+  //           app: "CloudPlayer",
+  //         }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error(`Network response was not ok ${response.statusText}`);
+  //     }
+
+  //     const data = await response.json();
+  //     setAuthenticateOpen(false);
+
+  //     localStorage.setItem("refresh_token", data.refresh_token);
+
+  //     // setToken(data.access_token); // Assume the token is returned in the access_token property
+  //     return data.access_token;
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+
   const [tokenFunc, setTokenFunc] = useState<() => Promise<string>>(null);
 
-  React.useEffect(() => {
-    const handleAuthMessage = (event) => {
-      if (
-        event.origin === window.location.origin &&
-        event.data.type === "auth_code"
-      ) {
-        setAuthCode(event.data.code);
-      }
-    };
+  // React.useEffect(() => {
+  //   const handleAuthMessage = (event) => {
+  //     if (
+  //       event.origin === window.location.origin &&
+  //       event.data.type === "auth_code"
+  //     ) {
+  //       setAuthCode(event.data.code);
+  //     }
+  //   };
 
-    // const onKeyDown = (e) => {
-    //   if (e.key === "Escape" && playerStateRef.current?.firstPlay) {
-    //     setShouldRenderMenus(!shouldRenderMenusRef.current);
-    //   }
-    // };
+  //   // const onKeyDown = (e) => {
+  //   //   if (e.key === "Escape" && playerStateRef.current?.firstPlay) {
+  //   //     setShouldRenderMenus(!shouldRenderMenusRef.current);
+  //   //   }
+  //   // };
 
-    window.addEventListener("message", handleAuthMessage);
-    // window.addEventListener("keydown", onKeyDown);
+  //   // window.addEventListener("message", handleAuthMessage);
+  //   // window.addEventListener("keydown", onKeyDown);
 
-    return () => {
-      window.removeEventListener("message", handleAuthMessage);
-      // window.removeEventListener("keydown", onKeyDown);
+  //   return () => {
+  //     window.removeEventListener("message", handleAuthMessage);
+  //     // window.removeEventListener("keydown", onKeyDown);
 
-      popupRef.current?.close();
-      popupRef.current = null;
-    };
-  }, []);
+  //     // popupRef.current?.close();
+  //     // popupRef.current = null;
+  //   };
+  // }, []);
 
-  React.useEffect(() => {
-    if (authCode !== null) {
-      authCodeRef.current = authCode;
-      setAuthenticateOpen(false);
-      // handleAuthorize();
-      setTokenFunc(() => handleAuthorize);
-    }
-  }, [authCode]);
+  // React.useEffect(() => {
+  //   if (authCode !== null) {
+  //     authCodeRef.current = authCode;
+  //     setAuthenticateOpen(false);
+  //     // console.log('auth code not null setting auth code authorize');
+  //     // handleAuthorize();
+  //     setTokenFunc(() => handleAuthorize);
+  //   }
+  // }, [authCode]);
 
   React.useEffect(() => {
     if (localStorage.getItem("refresh_token")) {
+      console.log("have refresh token");
       setAuthenticateOpen(false);
       // handleRefreshToken();
       setTokenFunc(() => handleRefreshToken);
-    } else {
-      console.log("authenticating");
-      setAuthenticateOpen(true);
+    } else if (link === null) {
+      // console.log("authenticating");
+      // setAuthenticateOpen(true);
+      // setAuthenticateOpen(true);
+      handleLink();
     }
   }, [bgLoaded]);
 
-  const popupRef = React.useRef<Window>(null);
-
-  const handleLogin = () => {
-    if (popupRef.current) return;
-
-    const clientId = "67632b17d7c243c5a1f28d736537addd";
-    const redirectUri = encodeURIComponent(
-      `${window.location.origin}/spotifyAuthSuccess`
-    );
-
-    const scopes = encodeURIComponent(
-      "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state " +
-        "playlist-read-private playlist-read-collaborative user-library-read " +
-        "user-read-playback-position user-read-recently-played user-top-read"
-    );
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scopes}`;
-
-    const popup = window.open(authUrl, "Spotify Login", "width=600,height=800");
-    popupRef.current = popup;
-  };
-
+  // const popupRef = React.useRef<Window>(null);
   // const [token, setToken] = useState(null);
   // const tokenRef = React.useRef(token);
 
@@ -229,9 +249,9 @@ export default () => {
 
   const [playerReady, setPlayerReady] = React.useState(false);
 
-  useEffect(() => {
-    console.log("player ready", playerReady);
-  }, [playerReady]);
+  // useEffect(() => {
+  //   // console.log("player ready", playerReady);
+  // }, [playerReady]);
   const [playerState, setPlayerState] = React.useState<ISpotifyState>(null);
   // const [currentTrackInfo, setCurrentTrackInfo] = React.useState(null);
   // const [currentTrackAnalysis, setCurrentTrackAnalysis] = React.useState(null);
@@ -276,9 +296,14 @@ export default () => {
   useEffect(() => {
     if (playerReady && !hasChangedTokenFuncs) {
       setHasChangedTokenFuncs(true);
-      setTokenFunc(() => handleRefreshToken);
     }
   }, [playerReady]);
+
+  useEffect(() => {
+    if (hasChangedTokenFuncs) {
+      setTokenFunc(() => handleRefreshToken);
+    }
+  }, [hasChangedTokenFuncs]);
 
   const [shouldRenderControls, setShouldRenderControls] = React.useState(true);
   const [shouldRenderMenus, setShouldRenderMenus] = React.useState(false);
@@ -550,7 +575,7 @@ export default () => {
   > = ["tatums", "beats", "segments", "bars", "sections"];
 
   const createLight = (scene?: Scene, recreate = false) => {
-    console.log("Create light");
+    // console.log("Create light");
     const lights: Array<{
       obj: Mesh<Geometry, MeshPhongMaterial>;
       title: string;
@@ -788,7 +813,7 @@ export default () => {
 
   const [visualizer, setVisualizer] = useState<
     "card" | "cloud" | "shader" | "video" | "capsules"
-  >("card");
+  >("capsules");
   const envTypeChangedTORef = useRef(null);
   const [canLoadView, setCanLoadView] = useState(false);
 
@@ -816,11 +841,11 @@ export default () => {
   }, [visualizer]);
 
   const envTypes: Array<"card" | "cloud" | "shader" | "video" | "capsules"> = [
-    "card",
-    "cloud",
-    "shader",
-    "video",
     "capsules",
+    "cloud",
+    "card",
+    "shader",
+    // "video",
   ];
 
   const _envToggles: Array<{ label: string; onClick: () => void }> =
@@ -847,7 +872,7 @@ export default () => {
         )}
       {visualizer === "cloud" && canLoadView && (
         <>
-          <Capsules trackAnalysis={currentAnalysis} player={player} />
+          {/* <Capsules trackAnalysis={currentAnalysis} player={player} /> */}
           <StarryNightBG
             onLoad={(_scene, _camera, _renderer, animationManager) => {
               setAnimManager(animationManager);
@@ -880,64 +905,56 @@ export default () => {
         />
       )}
       <>
-        <div
-          id="cloud-player-top-sticky-buttons"
-          style={{
-            zIndex: PLAYER_CONTROLS_ZINDEX + 2,
-            position: "fixed",
-            top: 20,
-            left: 10,
-            right: 20,
-            display: "flex",
-            justifyContent: "flex-end",
-            pointerEvents: bgLoaded ? "all" : "none",
-            opacity: bgLoaded ? 1 : 0,
-          }}
-        >
-          <Dropdown
-            toggleText={visualizer.toUpperCase()}
-            options={envToggles}
-          />
-          {/* <TextCarousel texts={envToggles.map(e => e.label)}/> */}
-        </div>
-        {/* <button
-            className="icon-button"
-            onClick={() => {
-              if (envType === "card") setEnvType("cloud");
-              else setEnvType("card");
-            }}
-          >
-            <CloudSyncIcon />
-          </button> */}
-        {authenticateOpen !== undefined && authenticateOpen === true && (
+        {authenticateOpen === false && (
+          <InactivityFader>
+            <div
+              id="cloud-player-top-sticky-buttons"
+              style={{
+                zIndex: PLAYER_CONTROLS_ZINDEX + 2,
+                position: "fixed",
+                top: 20,
+                left: 10,
+                right: 20,
+                display: "flex",
+                justifyContent: "flex-end",
+                pointerEvents:
+                  bgLoaded && shouldRenderControls ? "all" : "none",
+                opacity: bgLoaded && shouldRenderControls ? 1 : 0,
+                transition: "opacity 1s",
+              }}
+            >
+              <Dropdown
+                toggleText={visualizer.toUpperCase()}
+                options={envToggles}
+              />
+              {/* <TextCarousel texts={envToggles.map(e => e.label)}/> */}
+            </div>
+          </InactivityFader>
+        )}
+        {authenticateOpen === true && (
           <RoutesView
             overlayBlur={true}
             overlayBackground={true}
             containerBackground={true}
             containerBlur={true}
             title="Cloud Player"
-            defaultDescription={
-              authCode === null
-                ? "Login With Spotify to Continue."
-                : "Login Success!"
-            }
-            loading={false}
+            defaultDescription={"Login With Spotify to Continue."}
+            loading={link === null}
             routes={
-              authCode === null
+              link !== null
                 ? [
                     {
                       description: "Login With Spotify",
                       label: "Authenticate",
-                      onClick: () => {
-                        handleLogin();
-                      },
+                      href: link,
+                      newTab: false
                     },
                   ]
                 : undefined
             }
           />
         )}
-        {authenticateOpen === false && tokenFunc !== null && (
+        {tokenFunc !== null && (
           <div
             style={{
               position: "absolute",
@@ -954,20 +971,20 @@ export default () => {
               onPlayer={(p) => {
                 if (p !== undefined) {
                   setPlayer(p);
-                  console.log("on player");
+                  // console.log("on player");
                 }
               }}
               tokenFetch={tokenFunc}
               onPlayerReady={(ready) => {
-                console.log("On Player Ready");
+                // console.log("On Player Ready", ready);
                 setPlayerReady(ready);
               }}
               onPlayerStateChange={(state) => setPlayerState(state)}
               shouldRenderControls={shouldRenderControls}
               onCurrentTrackAnalyzed={(data) => {
-                console.log("on Current Track Analyzed");
+                // console.log("on Current Track Analyzed");
                 setCurrentAnalysis(data);
-                console.log(data);
+                // console.log(data);
               }}
             />
           </div>
@@ -1065,8 +1082,9 @@ export default () => {
       </>
       <LoadSpinner
         loading={
-          authenticateOpen === false &&
-          (playerReady === false || bgLoaded === false)
+          (authenticateOpen === true && link === null) ||
+          (authenticateOpen === false &&
+            (playerReady === false || bgLoaded === false))
         }
         hasBackground={true}
       />

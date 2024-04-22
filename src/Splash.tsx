@@ -196,6 +196,8 @@ export default () => {
     };
   }, []);
 
+
+
   const [isInitialSlideDone, setSlideDone] = React.useState(false);
   const [pointerInLink, setPointerInLink] = React.useState(false);
 
@@ -204,10 +206,15 @@ export default () => {
       <RoutesView
         containerBackground
         containerBlur
-        overlayBlurBackgroundStyle={{
-          blurAmount: 20,
+        containerBlurBackgroundStyle={{
           backgroundColor: "rgba(0,0,0,.25)",
+          blurAmount: 10,
         }}
+        overlayBackground={false}
+        // overlayBlurBackgroundStyle={{
+        //   blurAmount: 20,
+        //   backgroundColor: "rgba(0,0,0,.9)",
+        // }}
         routes={routes}
         loading={loading}
         defaultDescription={defaultDescription}

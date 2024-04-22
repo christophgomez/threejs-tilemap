@@ -33,7 +33,8 @@ export const HoverCardMenu = ({
     image?: string;
     actions?: Array<JSX.Element>;
     overrideAlign?: boolean;
-    constainWidth?: boolean;
+    constrainWidth?: boolean;
+    minWidth?: number | string;
   }>;
   canDrag?: boolean;
   curMenu?: number;
@@ -105,10 +106,11 @@ export const HoverCardMenu = ({
         actions={menus[curMenu].actions}
         body={menus[curMenu].body}
         overrideBodyAlign={menus[curMenu].overrideAlign}
+        minWidth={menus[curMenu].minWidth}
         constrainWidth={
-          menus[curMenu].constainWidth === undefined
+          menus[curMenu].constrainWidth === undefined
             ? undefined
-            : menus[curMenu].constainWidth
+            : menus[curMenu].constrainWidth
         }
       />
     </div>
@@ -135,6 +137,7 @@ const HoverCard = ({
   borderColor = "dark",
   height,
   width,
+  minWidth,
   canDrag = false,
   headerAction,
   autoHeight = false,
@@ -144,6 +147,7 @@ const HoverCard = ({
   autoHeight?: boolean;
   height?: number | string;
   width?: number | string;
+  minWidth?: number | string;
   title?: string;
   body?: string;
   actions?: Array<JSX.Element>;
@@ -319,9 +323,9 @@ const HoverCard = ({
         style={{
           zIndex: 999999,
 
-          width: width,
-          maxWidth: width,
-          minWidth: width,
+          width: !constrainWidth ? "auto" : minWidth ?? width,
+          maxWidth: constrainWidth ? minWidth ?? width : "auto",
+          minWidth: minWidth !== undefined ? minWidth : constrainWidth ? width : "auto",
           height: autoHeight ? "auto" : height,
           maxHeight: height,
           borderRadius: "1em",
@@ -329,7 +333,7 @@ const HoverCard = ({
           boxShadow: open ? "0px 0px 10px rgba(0, 0, 0, 1)" : "none", // Add a shadow on hover
           display: "flex",
           flexFlow: "column",
-          padding: '0 !important'
+          padding: "0 !important",
         }}
       >
         {headerAction !== undefined && (
@@ -392,7 +396,7 @@ const HoverCard = ({
                 // maxHeight: 137.5,
                 objectFit: "contain",
                 objectPosition: "center",
-                overflow: "hidden",
+                // overflow: "hidden",
                 "> img": {
                   objectFit: mediaWindowStyle,
                   objectPosition: "center",
@@ -419,8 +423,7 @@ const HoverCard = ({
                   maxWidth: "100%",
                   height: "100%",
                   width: "100%",
-                  borderRadius:
-                    orient === "vertical" ? "1em" : "1em",
+                  borderRadius: orient === "vertical" ? "1em" : "1em",
                   border:
                     mediaWindowStyle === "cover" ? "none" : ".2em solid #000", // Add a border to create the inset effect
                   background: "#0f0f0f", // Set a background color for the inset
@@ -438,48 +441,40 @@ const HoverCard = ({
             body !== undefined ||
             cardContent !== undefined) &&
             open && (
-              <Box
+              <CardContent
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  flex: "1 1 auto",
-                  overflowY: allowOverflow
-                    ? "scroll"
-                    : cardContent !== undefined
-                    ? "visible"
-                    : "hidden",
+                  flex: "1 0 auto",
+                  // margin: ".5em .75em !important",
+                  borderRadius: "0em 0em 1em 1em",
+                  // overflowY: allowOverflow
+                  //   ? "scroll"
+                  //   : cardContent !== undefined
+                  //   ? "visible"
+                  //   : "hidden",
+                  // marginTop:
+                  //   headerAction !== undefined ? "0 !important" : ".5em",
+                  paddingTop: headerAction !== undefined ? 0 : "16px",
+                  // border: ".2em solid #000", // Add a border to create the inset effect
+                  // backgroundColor: "#ffffff", // Set a background color for the inset
                 }}
               >
-                <CardContent
-                  sx={{
-                    flex: "1 0 auto",
-                    margin: ".5em .75em !important",
-                    borderRadius: "0em 0em 1em 1em",
-                    overflowY: allowOverflow
-                      ? "scroll"
-                      : cardContent !== undefined
-                      ? "visible"
-                      : "hidden",
-                    marginTop:
-                      headerAction !== undefined ? "0 !important" : ".5em",
-                    paddingTop: headerAction !== undefined ? 0 : "16px",
-                    // border: ".2em solid #000", // Add a border to create the inset effect
-                    // backgroundColor: "#ffffff", // Set a background color for the inset
-                  }}
-                >
-                  {!allowOverflow && title !== undefined && (
-                    <Typography gutterBottom variant="h5" component="div">
-                      {title}
-                    </Typography>
-                  )}
-                  {body !== undefined && (
-                    <Typography variant="body2" color="text.secondary">
-                      {body}
-                    </Typography>
-                  )}
-                  {cardContent !== undefined && cardContent}
-                </CardContent>
-              </Box>
+                {!allowOverflow && title !== undefined && (
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="div"
+                    sx={{ color: "black" }}
+                  >
+                    {title}
+                  </Typography>
+                )}
+                {body !== undefined && (
+                  <Typography variant="body2" color="text.secondary">
+                    {body}
+                  </Typography>
+                )}
+                {cardContent !== undefined && cardContent}
+              </CardContent>
             )}
           {actions !== undefined && (
             <Box

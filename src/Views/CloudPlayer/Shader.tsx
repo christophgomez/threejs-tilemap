@@ -7,7 +7,13 @@ import { ISpotifyPlayer } from "../../Spotify/PlayerComponent";
 import Animation from "../../lib/utils/Animation";
 import Tools from "../../lib/utils/Tools";
 
-type UpdateFunction = (dt: number) => void;
+type UpdateFunction = (
+  dt: number,
+  scene: THREE.Scene | THREE.Scene[],
+  camera: THREE.Camera,
+  renderer: THREE.Renderer,
+  animationManager: AnimationManager
+) => void;
 type OnLoadFunction = (
   scene: THREE.Scene | Array<THREE.Scene>,
   camera: THREE.Camera,
@@ -31,14 +37,14 @@ const fragShader = `
 varying vec2 vUv;
 
 			uniform float time;
-            uniform float beatConfidence; // Confidence of the current beat
-            uniform float beatDuration;   // Duration of the current beat
+      uniform float beatConfidence; // Confidence of the current beat
+      uniform float beatDuration;   // Duration of the current beat
             
 			void main()	{
 
 				vec2 p = - 1.0 + 2.0 * vUv;
-
-                float a = time * 40.0 * beatDuration; // Modifying animation speed using beatDuration
+        
+        float a = time * 40.0; // * beatDuration; // Modifying animation speed using beatDuration
 
 				float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
 
@@ -169,6 +175,7 @@ export default ({
         setCamera(camera);
         setScene(scene);
         setOnLoadedRef(onLoad);
+        setUpdateRef(onUpdate);
       }
     };
 
@@ -192,10 +199,10 @@ export default ({
     prop: "bars" | "beats" | "sections" | "segments" | "tatums",
     currentTimeS
   ) => {
-    if (!currentAnalysis) return null;
+    if (!analysisRef.current) return null;
 
     let propIndex = 0;
-    const currentProp = currentAnalysis[prop].find((prop, index) => {
+    const currentProp = analysisRef.current[prop].find((prop, index) => {
       const propEndTime = prop.start + prop.duration;
       propIndex = index;
       return prop.start <= currentTimeS && propEndTime > currentTimeS;
@@ -204,11 +211,22 @@ export default ({
     return {
       current: currentProp,
       index: propIndex,
-      object: currentAnalysis[prop],
+      object: analysisRef.current[prop],
     };
   };
 
   const processedSegments = useRef<Array<number>>([]);
+
+  const playerRef = useRef(player);
+
+  useEffect(() => {
+    playerRef.current = player;
+  }, [player]);
+
+  const analysisRef = useRef(currentAnalysis);
+  useEffect(() => {
+    analysisRef.current = currentAnalysis;
+  }, [currentAnalysis]);
 
   return (
     <div
@@ -243,21 +261,27 @@ export default ({
             ) => {
               if (updateRef && Array.isArray(updateRef)) {
                 (updateRef as Array<UpdateFunction>).forEach((update) =>
-                  update(dt)
+                  update(dt, scene, camera, renderer, animationManager)
                 );
               } else if (updateRef) {
-                (updateRef as UpdateFunction)(dt);
+                (updateRef as UpdateFunction)(
+                  dt,
+                  scene,
+                  camera,
+                  renderer,
+                  animationManager
+                );
               }
 
-              if (onUpdate)
-                onUpdate(dt, scene, camera, renderer, animationManager);
+              // if (onUpdate)
+              //   onUpdate(dt, scene, camera, renderer, animationManager);
 
               if (meshRef.current) {
                 meshRef.current.material.uniforms["time"].value += dt;
               }
 
-              if (currentAnalysis && player) {
-                const state = await player.getCurrentState();
+              if (analysisRef.current && playerRef.current) {
+                const state = await playerRef.current.getCurrentState();
 
                 const currentTimeS = state.position / 1000;
 
@@ -270,7 +294,7 @@ export default ({
                   current &&
                   processedSegments.current.indexOf(index) === -1
                 ) {
-                  console.log(current);
+                  // console.log(current);
                   processedSegments.current.push(index);
                   if (meshRef.current) {
                     const targetConfidence = current.confidence * 10;
@@ -283,12 +307,12 @@ export default ({
                         targetConfidence,
                         factor
                       );
-                    meshRef.current.material.uniforms["beatDuration"].value =
-                      Tools.lerpFactor(
-                        meshRef.current.material.uniforms["beatDuration"].value,
-                        targetDuration,
-                        factor
-                      );
+                    // meshRef.current.material.uniforms["beatDuration"].value =
+                    //   Tools.lerpFactor(
+                    //     meshRef.current.material.uniforms["beatDuration"].value,
+                    //     targetDuration,
+                    //     factor
+                    //   );
                   }
                 }
               }
@@ -302,7 +326,7 @@ export default ({
                 (onLoadedRef as OnLoadFunction)(scene, camera, renderer, am);
               }
 
-              if (onLoad !== undefined) onLoad(scene, camera, renderer, am);
+              // if (onLoad !== undefined) onLoad(scene, camera, renderer, am);
             }}
             transparent={true}
             render={true}

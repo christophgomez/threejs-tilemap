@@ -85,7 +85,7 @@ export default ({
           scene: starScene,
           update: starUpdate,
           onLoad: starLoad,
-        } = createStarScene(cloudCam, 0x0077ff, 0xffffff, 100);
+        } = createStarScene(cloudCam, 0x0077ff, 0xffffff, 50);
 
         starScene.renderOrder = 0;
         cloudScene.renderOrder = 1;

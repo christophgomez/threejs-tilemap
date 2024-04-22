@@ -320,49 +320,49 @@ const Catan = ({
         scene.map,
         scene
       );
-      console.log("done with water");
+      // console.log("done with water");
 
       await addHills(
         scene.map.tiles.filter((x) => x.type.name === "Plain"),
         points,
         scene
       );
-      console.log("done with hills");
+      // console.log("done with hills");
 
       await addMountains(
         scene.map.tiles.filter((x) => x.type.name === "Mountain"),
         points,
         scene
       );
-      console.log("done with mts");
+      // console.log("done with mts");
 
       await addFarms(
         scene.map.tiles.filter((x) => x.type.name === "Grain"),
         points,
         scene
       );
-      console.log("done with farms");
+      // console.log("done with farms");
 
       await addClay(
         scene.map.tiles.filter((x) => x.type.name === "Brick"),
         points,
         scene
       );
-      console.log("done with clay");
+      // console.log("done with clay");
 
       await addForest(
         scene.map.tiles.filter((x) => x.type.name === "Forest"),
         points,
         scene
       );
-      console.log("done with forest");
+      // console.log("done with forest");
 
       await addDesert(
         scene.map.tiles.filter((x) => x.type.name === "Desert"),
         points,
         scene
       );
-      console.log("done with desert");
+      // console.log("done with desert");
 
       await addPort(
         scene.map.tiles.filter((x) => "ports" in x.getCustomData()),
@@ -370,7 +370,7 @@ const Catan = ({
         setPortInfoState
       );
 
-      console.log("done with ports");
+      // console.log("done with ports");
 
       const { group: northGroup, update: northUpdate } = Cloud();
       const { group: eastGroup, update: eastUpdate } = Cloud({
@@ -382,7 +382,7 @@ const Catan = ({
         maxX: 700,
       });
 
-      console.log("done with clouds");
+      // console.log("done with clouds");
       scene.container.add(northGroup, eastGroup, westGroup);
       scene.animationManager.addOnAnimateListener((dt) => {
         northUpdate(dt, scene.camera, false);
@@ -846,14 +846,14 @@ const Catan = ({
   };
 
   const onHomeDown = () => {
-    console.log("on home");
+    // console.log("on home");
     if (!playersRef.current) return;
 
     const settlements = playersRef.current[0].settlements;
 
     if (settlements.length > 0) {
       onSpaceDown(undefined, () => {
-        console.log("on comp");
+        // console.log("on comp");
         panThroughSettlements(settlements);
       });
     }
@@ -895,7 +895,7 @@ const Catan = ({
 
     if (scene) {
       controller.active = false;
-      console.log(controller.currentAzimuthAngle);
+      // console.log(controller.currentAzimuthAngle);
       await scene.panCameraTo(
         new Vector3(0, 0, 0),
         1000,
@@ -932,7 +932,7 @@ const Catan = ({
       roadOnPointer.current = false;
       cityOnPointer.current = false;
     }
-    console.log("toggleRobberOnPointer");
+    // console.log("toggleRobberOnPointer");
 
     controller.edgeSnapping = false;
     controller.vertexSnapping = false;
@@ -952,7 +952,7 @@ const Catan = ({
       players[activePlayerIndex].diceRoll !== 7
     )
       return;
-    console.log("onRobberLeftDown");
+    // console.log("onRobberLeftDown");
 
     scene.panCameraTo(new Vector3(0, 0, 0), 500, () => {
       scene.zoomMax(ZoomDirection.OUT, 500, undefined, () => {
@@ -972,7 +972,7 @@ const Catan = ({
       pointerEntity.current.getCustomData()["type"] !== "robber"
     )
       return;
-    console.log("onRobberCanvasLeftUp");
+    // console.log("onRobberCanvasLeftUp");
 
     // if (!args.data || !(args.data instanceof Tile)) {
     pointerEntity.current.highlight(false);
@@ -1002,7 +1002,7 @@ const Catan = ({
     )
       return;
 
-    console.log("onRobberPlaced");
+    // console.log("onRobberPlaced");
 
     let tile: Tile;
     if (args.data && args.data instanceof Tile) {
@@ -1056,7 +1056,7 @@ const Catan = ({
     )
       return;
 
-    console.log("toggleOwnedEntityOnPointer");
+    // console.log("toggleOwnedEntityOnPointer");
 
     if (pointerEntity.current) {
       controller.removeEntityFromPointer();
@@ -1132,7 +1132,7 @@ const Catan = ({
     mousePos: Vector3;
   }) => {
     if (pointerEntity.current) return;
-    console.log("onOwnedEntityLeftDown");
+    // console.log("onOwnedEntityLeftDown");
 
     toggleOwnedEntityOnPointer(args.data);
   };
@@ -1148,7 +1148,7 @@ const Catan = ({
     )
       return;
 
-    console.log("onOwnedEntityCanvasLeftUp");
+    // console.log("onOwnedEntityCanvasLeftUp");
 
     // if (!args.data || !(args.data instanceof Tile)) {
     pointerEntity.current.highlight(false);
@@ -1180,7 +1180,7 @@ const Catan = ({
       pointerEntity.current.getCustomData()["type"] !== "robber"
     )
       return;
-    console.log("onOwnedEntityPlaced");
+    // console.log("onOwnedEntityPlaced");
 
     let tile: Tile;
     if (args.data && args.data instanceof Tile) {
@@ -1390,7 +1390,7 @@ const Catan = ({
     mousePos: Vector3;
   }) => {
     if (!controller || !pointerEntity.current) return;
-    console.log("onBuildPlaced");
+    // console.log("onBuildPlaced");
 
     controller.onEntityPlacementValidator = undefined;
 
@@ -1431,7 +1431,7 @@ const Catan = ({
   }) => {
     if (!pointerEntity.current) return;
 
-    console.log("onBuildLeftUp");
+    // console.log("onBuildLeftUp");
 
     if (!args.data || !(args.data instanceof Tile)) {
       if (
@@ -1472,12 +1472,12 @@ const Catan = ({
       const player = players.find((p) => p.id === e.getCustomData().owner);
 
       if (player) {
-        console.log(
-          "Awarding resource: " +
-            tile.getCustomData().resource +
-            " to player: " +
-            player.id
-        );
+        // console.log(
+        //   "Awarding resource: " +
+        //     tile.getCustomData().resource +
+        //     " to player: " +
+        //     player.id
+        // );
 
         switch (tile.getCustomData().resource) {
           case Resources.LUMBER:
@@ -1529,9 +1529,9 @@ const Catan = ({
             continue;
           }
 
-          console.log(
-            "awarding ents on tile: " + t.mapPosition.toArray().toString()
-          );
+          // console.log(
+          //   "awarding ents on tile: " + t.mapPosition.toArray().toString()
+          // );
 
           let ents = [
             ...t.entities.filter(
@@ -1547,15 +1547,15 @@ const Catan = ({
             awardResource(t, e);
           }
 
-          console.log(
-            "done awarding resources from tile: " +
-              t.mapPosition.toArray().toString()
-          );
+          // console.log(
+          //   "done awarding resources from tile: " +
+          //     t.mapPosition.toArray().toString()
+          // );
         }
 
-        console.log(
-          "[AwardResources] Showing entities that earned resources to respective players"
-        );
+        // console.log(
+        //   "[AwardResources] Showing entities that earned resources to respective players"
+        // );
 
         const _onComplete = () => {
           setAwardingResources(false);
@@ -1589,11 +1589,11 @@ const Catan = ({
             _onComplete();
           });
         } else if (gameState === GameState.PLAY) {
-          console.log("[AwardResources] Panning through ents");
+          // console.log("[AwardResources] Panning through ents");
 
           const activeID = activePlayerIDRef.current;
 
-          console.log("activeID: " + activeID);
+          // console.log("activeID: " + activeID);
           const ents: MeshEntity[] = [];
           for (const t of tiles) {
             if (
@@ -1636,8 +1636,8 @@ const Catan = ({
     holdDuration = 1000,
     onComplete?: () => void
   ) => {
-    console.log("panning through settlements: ");
-    console.log(settlements);
+    // console.log("panning through settlements: ");
+    // console.log(settlements);
 
     controller.active = false;
     controller.toggleRotation(false);
@@ -1649,8 +1649,8 @@ const Catan = ({
       ),
       holdDuration,
       () => {
-        console.log("toggling rot");
-        console.log(controller.currentAzimuthAngle);
+        // console.log("toggling rot");
+        // console.log(controller.currentAzimuthAngle);
         controller.toggleRotation(true);
         controller.active = true;
         if (onComplete) onComplete();

@@ -3,6 +3,22 @@ import React from "react";
 import "./styles.css";
 import { PLAYER_CONTROLS_ZINDEX } from "../../Spotify/PlayerComponent";
 
+function getRandomEmoji() {
+  const emojiRanges = [
+    [0x1F601, 0x1F64F], // Emoticons
+    [0x1F680, 0x1F6C0], // Transport & Map Symbols
+    [0x1F6F0, 0x1F6F3], // Transport & Map Symbols Extended
+    [0x1F30D, 0x1F567], // Other additional symbols
+  ];
+
+  // Select one range randomly
+  const range = emojiRanges[Math.floor(Math.random() * emojiRanges.length)];
+  // Select one codepoint within that range randomly
+  const codePoint = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+  // Convert the codepoint to a string/character
+  return String.fromCodePoint(codePoint);
+}
+
 export default ({
   loading,
   onToggled,
@@ -17,6 +33,8 @@ export default ({
   const [isLoadFinished, setIsLoadFinished] = React.useState(false);
   const [isLoadFadePauseFinished, setIsLoadFadePauseFinished] =
     React.useState(false);
+
+  const [emoji, setEmoji] = React.useState(getRandomEmoji());
 
   React.useEffect(() => {
     if (!loading) {
@@ -100,7 +118,7 @@ export default ({
               sx={{ mt: 1.5 }}
               variant="h6"
             >
-              {isLoadFinished ? "Have Fun!" : `Loading`}
+              {isLoadFinished ? emoji : `Loading`}
             </Typography>
           </Box>
         </Box>

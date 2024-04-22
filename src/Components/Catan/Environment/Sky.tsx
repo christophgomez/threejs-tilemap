@@ -309,7 +309,7 @@ export const CreateStarField = (
     clusterType = "galaxy" // New parameter to specify the type of cluster
   ) {
     for (let i = 0; i < quantity; i++) {
-      var geometry = geometryCreator(10000, Math.random() * 0.4, clusterType);
+      var geometry = geometryCreator(5000, Math.random() * 0.4, clusterType);
       var material = new THREE.PointsMaterial({
         size: Math.random() * size + 1,
         map: sprite,
